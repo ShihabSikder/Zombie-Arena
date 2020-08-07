@@ -1,8 +1,12 @@
 #include <SFML/Graphics.hpp>
 #include "player.h"
-
+#include "ZombieArena.h"
+//#include "Zombie.h"
 int main()
 {
+
+    TextureHolder holder;
+
     enum class State
     {
         PAUSED,
@@ -10,6 +14,8 @@ int main()
         GAME_OVER,
         PLAYING
     };
+    //Load the texture for our background
+
 
     //Starting the game with gameover state
     State state = State::GAME_OVER;
@@ -20,7 +26,7 @@ int main()
     resolution.y = sf::VideoMode::getDesktopMode().height;
 
     sf::RenderWindow window(sf::VideoMode(resolution.x, resolution.y),
-                            "Zombie Arena", sf::Style::Fullscreen);
+        "Zombie Arena", sf::Style::Fullscreen);
 
     //VIEW for main action
     sf::View mainView(sf::FloatRect(0, 0, resolution.x, resolution.y));
@@ -37,6 +43,19 @@ int main()
     Player player;
 
     sf::IntRect arena;
+    sf::VertexArray background;
+    background.setPrimitiveType(sf::Quads);
+
+    //Create the backgroundVertexArray
+    sf::Texture textureBackground;
+    textureBackground.loadFromFile("src/gfx/background_sheet.png");
+
+    int numZombies;
+    int numZombiesAlive;
+
+    Zombie* zombies = nullptr;
+
+
     while (window.isOpen())
     {
         //Handle input
@@ -58,13 +77,13 @@ int main()
                 }
                 //Restart while paused
                 else if (event.key.code == sf::Keyboard::Space &&
-                         state == State::PAUSED)
+                    state == State::PAUSED)
                 {
                     state = State::PLAYING;
                 }
                 //start a new game
                 else if (event.key.code == sf::Keyboard::Space &&
-                         state == State::GAME_OVER)
+                    state == State::GAME_OVER)
                 {
                     state = State::LEVELING_UP;
                 }
@@ -123,13 +142,21 @@ int main()
             }
             if (state == State::PLAYING)
             {
-                arena.width = 500;
-                arena.height = 500;
+                arena.width = 1000;
+                arena.height = 1000;
                 arena.left = 0;
                 arena.top = 0;
+                //pass the vertex array to the function
 
-                int tileSize = 50;
+                int tileSize = createBackground(background, arena);
                 player.spawn(arena, resolution, tileSize);
+
+                numZombies = 10;
+
+                delete[] zombies;
+
+                zombies = createHorde(numZombies, arena);
+                numZombiesAlive = numZombies;
                 clock.restart();
             }
         } // End of leveling UP
@@ -149,12 +176,21 @@ int main()
 
             //make the view center around the player
             mainView.setCenter(player.getCenter());
+            //Loop through the zombies
+            for (int i=0;i<numZombies;i++) {
+                if (zombies[i].isActive()) {
+                    zombies[i].update(dt.asSeconds(), playerPosition);
+                }
+            }
         }
         //Draw the Scene
         if (state == State::PLAYING)
         {
             window.clear();
             window.setView(mainView);
+            window.draw(background, &textureBackground);
+            for (int i=0;i<numZombies;i++)
+                window.draw(zombies[i].getSprite());
             window.draw(player.getSprite());
         }
         if (state == State::LEVELING_UP)
@@ -166,7 +202,9 @@ int main()
         if (state == State::PAUSED)
         {
         }
+
         window.display();
     }
+    delete[] zombies;
     return 0;
 }
