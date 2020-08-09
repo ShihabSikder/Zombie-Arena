@@ -27,7 +27,7 @@ int main()
 
     sf::RenderWindow window(sf::VideoMode(resolution.x, resolution.y),
         "Zombie Arena", sf::Style::Fullscreen);
-
+    window.setFramerateLimit(120);
     //VIEW for main action
     sf::View mainView(sf::FloatRect(0, 0, resolution.x, resolution.y));
 
@@ -47,8 +47,9 @@ int main()
     background.setPrimitiveType(sf::Quads);
 
     //Create the backgroundVertexArray
-    sf::Texture textureBackground;
-    textureBackground.loadFromFile("src/gfx/background_sheet.png");
+    sf::Texture textureBackground = TextureHolder::GetTexture("src/gfx/background_sheet.png");
+    //sf::Texture textureBackground;
+    //textureBackground.loadFromFile("src/gfx/background_sheet.png");
 
     int numZombies;
     int numZombiesAlive;
@@ -142,8 +143,8 @@ int main()
             }
             if (state == State::PLAYING)
             {
-                arena.width = 1000;
-                arena.height = 1000;
+                arena.width = 1080;
+                arena.height = 1080;
                 arena.left = 0;
                 arena.top = 0;
                 //pass the vertex array to the function
@@ -151,7 +152,7 @@ int main()
                 int tileSize = createBackground(background, arena);
                 player.spawn(arena, resolution, tileSize);
 
-                numZombies = 10;
+                numZombies = 100;
 
                 delete[] zombies;
 

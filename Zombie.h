@@ -32,7 +32,7 @@ private:
     float m_Health;
 
     //is it still alive?
-    bool m_Active;
+    bool m_Active = true;
 
 public:
     bool hit() {
@@ -75,8 +75,8 @@ public:
         float modifier = (rand()%MAX_VARRIANCE) + OFFSET;
         modifier /=100;
         m_Speed *= modifier;
-        m_Position.x = startX;
-        m_Position.y = startY;
+        m_Position.x = startX ;
+        m_Position.y = startY ;
         m_Sprite.setOrigin(25, 25);
         m_Sprite.setPosition(m_Position);
     }
