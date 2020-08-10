@@ -1,38 +1,38 @@
 #include<SFML/Graphics.hpp>
 
-class Bullet{
-    private:
-        sf::Vector2f m_Position;
-        sf::RectangleShape m_BulletShape;
-        bool m_InFlight = false;
-        float m_BulletSpeed = 1000;
-        float m_BulletDistanceX;
-        float m_BulletDistanceY;
+class Bullet {
+private:
+    sf::Vector2f m_Position;
+    sf::RectangleShape m_BulletShape;
+    bool m_InFlight = false;
+    float m_BulletSpeed = 1000;
+    float m_BulletDistanceX;
+    float m_BulletDistanceY;
 
-        float m_MinX,m_MaxX,m_MinY,m_MaxY;
-    
-    public:
-        Bullet();
-        void stop();
-        bool isInFlight();
-        void shoot(float startX, float startY, float targetX, float targetY);
-        sf::FloatRect getPosition();
-        sf::RectangleShape getShape();
-        void update(float elapsedTime);
+    float m_MinX, m_MaxX, m_MinY, m_MaxY;
+
+public:
+    Bullet();
+    void stop();
+    bool isInFlight();
+    void shoot(float startX, float startY, float targetX, float targetY);
+    sf::FloatRect getPosition();
+    sf::RectangleShape getShape();
+    void update(float elapsedTime);
 };
 
-Bullet::Bullet(){
-    m_BulletShape.setSize(sf::Vector2f(2,2));
+Bullet::Bullet() {
+    m_BulletShape.setSize(sf::Vector2f(2, 2));
 }
 
-void Bullet::shoot(float startX, float startY, float targetX, float targetY){
+void Bullet::shoot(float startX, float startY, float targetX, float targetY) {
     m_InFlight = true;
     m_Position.x = startX;
     m_Position.y = startY;
-    
+
     //we need to calculate the gradiant to set the angle
     float gradient = (startX - targetX)/(startY - targetY);
-    if(gradient<1){
+    if (gradient<1) {
         gradient -= -1;
     }
     float ratioXY = m_BulletSpeed/(1+gradient);
@@ -41,9 +41,9 @@ void Bullet::shoot(float startX, float startY, float targetX, float targetY){
     m_BulletDistanceX = ratioXY;
     m_BulletDistanceY = ratioXY*gradient;
 
-    if(targetX < startX)
+    if (targetX < startX)
         m_BulletDistanceX *= -1;
-    if(targetY < startY)
+    if (targetY < startY)
         m_BulletDistanceY *= -1;
     float range = 1000;
     m_MinX = startX - range;
@@ -51,4 +51,32 @@ void Bullet::shoot(float startX, float startY, float targetX, float targetY){
     m_MinY = startY - range;
     m_MaxY = startY + range;
     m_BulletShape.setPosition(m_Position);
+}
+
+void Bullet::stop() {
+    m_InFlight = false;
+}
+
+bool Bullet::isInFlight() {
+    return m_InFlight;
+}
+
+sf::FloatRect Bullet::getPosition() {
+    return m_BulletShape.getGlobalBounds();
+}
+
+sf::RectangleShape Bullet::getShape(){
+    return m_BulletShape;
+}
+
+void Bullet::update(float elapsedTime) {
+    m_Position.x += m_BulletDistanceX*elapsedTime;
+    m_Position.y += m_BulletDistanceY*elapsedTime;
+
+    m_BulletShape.setPosition(m_Position);
+    //if bullet is gone out of range then 
+    //it's active status will be gone 
+    if (m_Position.x<m_MinX || m_Position.x>m_MaxX || m_Position.y<m_MinY || m_Position.y>m_MaxY) {
+        m_InFlight = false;
+    }
 }
